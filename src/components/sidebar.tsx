@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { BarChart3, Menu, Package, Users } from 'lucide-react';
+import { BarChart3, Menu, Users } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { usePathname } from 'next/navigation';
+import { PdfUploadDialog } from '@/components/pdf-upload-dialog';
 import { cn } from '@/lib/utils';
 
 const sidebarItems = [
@@ -107,9 +108,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className='hidden lg:flex'>
-            <Button variant='ghost' size='icon'>
-              <Package className='h-4 w-4' />
-            </Button>
+            <PdfUploadDialog />
           </div>
         </header>
         {children}
