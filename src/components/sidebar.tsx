@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { BarChart3, Menu, Users } from 'lucide-react';
+import { BarChart3, Menu, Table } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { PdfUploadDialog } from '@/components/pdf-upload-dialog';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 
 const sidebarItems = [
   { name: 'Dashboard', icon: BarChart3, path: '/' },
-  { name: 'Customers', icon: Users, path: '/biblioteca' },
+  { name: 'Faturas', icon: Table, path: '/biblioteca' },
 ];
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
