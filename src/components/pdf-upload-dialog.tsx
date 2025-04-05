@@ -3,6 +3,7 @@
 import type React from 'react';
 
 import { useState, useRef } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileIcon, Upload, UploadIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +23,24 @@ interface FileWithPreview extends File {
 }
 
 export function PdfUploadDialog() {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await axiosInstance.post('/invoices', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -77,17 +96,12 @@ export function PdfUploadDialog() {
   const handleSubmit = async () => {
     try {
       const formData = new FormData();
+
       files.forEach((file) => {
         formData.append('file', file);
       });
 
-      const response = await axiosInstance.post('/invoices', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      console.log('Files uploaded successfully:', response.data);
+      mutate(formData);
     } catch (error) {
       console.error('Error uploading files:', error);
     } finally {
@@ -106,14 +120,15 @@ export function PdfUploadDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Upload /> Upload PDF
+          <Upload /> Salvar Faturas
         </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
-          <DialogTitle>Upload PDF Files</DialogTitle>
+          <DialogTitle>Fazer upload de arquivos PDF</DialogTitle>
           <DialogDescription>
-            Drag and drop your PDF files or click to browse
+            Arraste e solte seus arquivos PDF ou clique para navegar pelos
+            arquivos locais
           </DialogDescription>
         </DialogHeader>
         <div
@@ -169,17 +184,17 @@ export function PdfUploadDialog() {
                 <UploadIcon className='h-8 w-8 text-primary' />
               </div>
               <p className='mb-2 text-sm font-medium'>
-                Drag and drop your PDF files here
+                Arraste e solte seus arquivos PDF aqui
               </p>
               <p className='text-xs text-gray-500'>
-                Only PDF files are supported
+                Apenas arquivos PDF são suportados
               </p>
               <Button
                 variant='secondary'
                 className='mt-4'
                 onClick={onButtonClick}
               >
-                Browse Files
+                Navegar Arquivos
               </Button>
             </>
           )}
@@ -187,15 +202,15 @@ export function PdfUploadDialog() {
         <DialogFooter className='flex items-center justify-between sm:justify-between'>
           <p className='text-xs text-gray-500'>
             {files.length > 0
-              ? `${files.length} file${files.length > 1 ? 's' : ''} selected`
-              : 'No files selected'}
+              ? `${files.length} arquivo(s) selecionado(s)`
+              : 'Nenhum arquivo selecionado'}
           </p>
           <Button
             type='submit'
-            disabled={files.length === 0}
+            disabled={files.length === 0 || isPending}
             onClick={handleSubmit}
           >
-            Upload
+            Fazer upload
           </Button>
         </DialogFooter>
       </DialogContent>
